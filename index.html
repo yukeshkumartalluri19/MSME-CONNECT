@@ -1,0 +1,154 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MSME Connect - Simplified</title>
+<style>
+body { font-family: Arial; padding:20px; background:#f5f7fb; }
+.card { background:white; padding:20px; border-radius:10px; margin-bottom:20px; }
+.btn { padding:10px 15px; border:none; cursor:pointer; border-radius:8px; }
+.btn-primary { background:#0f62fe; color:white; }
+.hidden { display:none; }
+</style>
+</head>
+
+<body>
+
+<h2>MSME Connect (Prototype)</h2>
+
+<!-- APPLY FORM -->
+<div class="card">
+<h3>Apply for Scheme</h3>
+
+<form id="applicationForm">
+<input type="text" name="name" placeholder="Name" required><br><br>
+<input type="email" name="email" placeholder="Email" required><br><br>
+
+<select name="scheme">
+<option>Subsidy for Machines</option>
+<option>MSME Loans</option>
+</select><br><br>
+
+<button class="btn btn-primary">Submit</button>
+</form>
+
+<div id="success" class="hidden">
+<p>Tracking ID: <strong id="trackId"></strong></p>
+</div>
+</div>
+
+<!-- RAW MATERIAL -->
+<div class="card">
+<h3>Buy Raw Material</h3>
+<button class="btn btn-primary" onclick="openEmailModal('Steel','KSM Supplier')">
+Contact Supplier
+</button>
+</div>
+
+<!-- APPLICATION LIST -->
+<div class="card">
+<h3>Applications</h3>
+<div id="apps"></div>
+</div>
+
+<!-- EMAIL MODAL -->
+<div id="modal" class="hidden" style="
+position:fixed; top:0; left:0; right:0; bottom:0;
+background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center;">
+<div class="card">
+<h3>Enter Email</h3>
+<input type="email" id="buyerEmail"><br><br>
+<button class="btn btn-primary" onclick="submitEmail()">Submit</button>
+<button class="btn" onclick="closeModal()">Cancel</button>
+</div>
+</div>
+
+<script>
+
+let applications = [];
+let selectedMaterial = null;
+
+// APPLY FORM
+document.getElementById("applicationForm").addEventListener("submit", function(e){
+e.preventDefault();
+
+const tracking = "MSME-" + Math.floor(10000 + Math.random()*90000);
+const email = this.email.value;
+
+document.getElementById("trackId").textContent = tracking;
+document.getElementById("success").classList.remove("hidden");
+
+alert(`Tracking ID ${tracking} sent to ${email}`);
+
+applications.unshift({
+id: tracking,
+email: email,
+scheme: this.scheme.value,
+status: "Submitted"
+});
+
+renderApps();
+this.reset();
+});
+
+// RENDER APPLICATIONS
+function renderApps(){
+document.getElementById("apps").innerHTML = applications.map(a=>`
+<div class="card">
+<b>${a.scheme}</b><br>
+ID: ${a.id}<br>
+Status: ${a.status}<br><br>
+<button onclick="updateStatus('${a.id}','Approved')">Approve</button>
+</div>
+`).join("");
+}
+
+// STATUS UPDATE EMAIL
+function sendStatusEmail(email,id,status){
+alert(`Email sent to ${email}
+
+Tracking: ${id}
+Status: ${status}`);
+}
+
+// UPDATE STATUS
+function updateStatus(id,status){
+const app = applications.find(a=>a.id===id);
+app.status = status;
+
+sendStatusEmail(app.email, app.id, status);
+renderApps();
+}
+
+// MODAL
+function openEmailModal(item,seller){
+selectedMaterial = {item,seller};
+document.getElementById("modal").classList.remove("hidden");
+}
+
+function closeModal(){
+document.getElementById("modal").classList.add("hidden");
+}
+
+// MATERIAL EMAIL
+function submitEmail(){
+const email = document.getElementById("buyerEmail").value;
+
+if(!email.includes("@")){
+alert("Invalid email");
+return;
+}
+
+alert(`Inquiry sent to ${selectedMaterial.seller}
+Item: ${selectedMaterial.item}
+User Email: ${email}`);
+
+closeModal();
+}
+
+</script>
+
+</body>
+</html>
+```
